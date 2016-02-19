@@ -1,0 +1,183 @@
+<!--<!DOCTYPE html>
+&lt;!&ndash;
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+     KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+&ndash;&gt;
+<html>
+    <head>
+        &lt;!&ndash;
+        Customize this policy to fit your own app's needs. For more guidance, see:
+            https://github.com/apache/cordova-plugin-whitelist/blob/master/README.md#content-security-policy
+        Some notes:
+            * gap: is required only on iOS (when using UIWebView) and is needed for JS->native communication
+            * https://ssl.gstatic.com is required only on Android and is needed for TalkBack to function properly
+            * Disables use of inline scripts in order to mitigate risk of XSS vulnerabilities. To change this:
+                * Enable inline JS: add 'unsafe-inline' to default-src
+        &ndash;&gt;
+        <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *">
+        <meta name="format-detection" content="telephone=no">
+        <meta name="msapplication-tap-highlight" content="no">
+        <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
+
+        <title>Hello World</title>
+    </head>
+    <body>
+        &lt;!&ndash;<div class="app">&ndash;&gt;
+            &lt;!&ndash;<h1>Apache Cordova</h1>&ndash;&gt;
+          &lt;!&ndash;  <div id="deviceready" class="blink">
+                <p class="event listening">Connecting to Device</p>
+                <p class="event received">Device is Ready</p>
+            </div>&ndash;&gt;
+      &lt;!&ndash;  </div>&ndash;&gt;
+
+        <script type="text/javascript" src="cordova.js"></script>
+        <script type="text/javascript" src="js/index.js"></script>
+    </body>
+</html>-->
+<!DOCTYPE HTML>
+
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link rel="stylesheet" type="text/css" href="css/index.css">
+    <title>Contact Example</title>
+
+    <script type="text/javascript" charset="utf-8" src="cordova.js"></script>
+    <script type="text/javascript" charset="utf-8" src="js/jquery-1.12.0.min.js"></script>
+    <!--script type="text/javascript" charset="utf-8" src="jquery.mobile-1.0.1.js"></script-->
+    <script type="text/javascript" charset="utf-8">
+
+        var selected ;;
+
+        $(function(){
+            // Wait for PhoneGap to load
+            //
+            document.addEventListener("deviceready", onDeviceReady, false);
+
+            // PhoneGap is ready
+            //
+            function onDeviceReady() {
+                var options = new ContactFindOptions();
+                var fields = ["displayName", "phoneNumbers"];
+                navigator.contacts.find(fields, onSuccess, onError);
+            }
+
+            var list = $("#contacts");
+            function onSuccess(contacts) {
+                for (var i=0; i<contacts.length; i++) {
+                    /*  console.log("Display Name = " + contacts[i].displayName);*/
+                    $("<p class='contact'/>").text(contacts[i].displayName + contacts.length)
+                            .data("name", contacts[i].displayName)
+                            .data("number", contacts[i].phoneNumbers[0].value)
+                            .data("list_num",i)
+                            .click(function(){
+                                $("#name").text($(this).data("name"));
+                                $("#number").text($(this).data("number"));
+                                selected = $(this).data("list_num") ;
+                                $("#detail").show();
+                                $("#contacts").hide();
+                            })
+                            .appendTo(list);
+                }
+                //alert(contacts.length+' contact totally');
+            }
+
+            // onError: Failed to get the contacts
+            //
+            function onError(contactError) {
+             //   alert('onError!');
+                for (var i=0; i<100; i++) {
+                    /*  console.log("Display Name = " + contacts[i].displayName);*/
+                    $("<p class='contact'/>").text('contact:num'+i)
+                            .data("name", 'contact:num'+i)
+                            .data("number",'phonenum'+i)
+                            .click(function(){
+                                $("#name").text($(this).data("name"));
+                                $("#number").text($(this).data("number"));
+                                $("#detail").show();
+                                $("#contacts").hide();
+                            })
+                            .appendTo(list);
+                }
+            }
+
+            $("#back").click(function(){
+                $("#detail").hide();
+                $("#contacts").show();
+            });
+            $("#add_back").click(function(){
+                $("#add_form").hide();
+                $("#contacts").show();
+                $("#add").show();
+            });
+            $("#add").click(function(){
+                $("#contacts").hide();
+                $("#add").hide();
+                $("#add_form").show();
+            });
+            $("#add_confirm").click(function(){
+                var newContact = navigator.contacts.create({"displayName":  $("#name_add").val()});
+                newContact.mobile  =  $("#mobile_add").val() ;
+                var phoneNumbers = [];
+                phoneNumbers[0] = new ContactField('work',$("#mobile_add").val(), false);
+              //  phoneNumbers[1] = new ContactField('mobile', employee.cellPhone, true);
+                newContact.phoneNumbers = phoneNumbers  ;
+                newContact.name = $("#name_add").val() ;
+
+                newContact.save() ;
+                alert( "添加成功") ;
+                $("#contacts").show();
+                $("#add").show();
+                $("#add_form").hide();
+            });
+            $("#delete").click(function(){
+                if(confirm("确定删除？")) {
+                    contacts[selected].remove();
+                    $("#contacts").show();
+                    $("#add").show();
+                    $("#detail").hide();
+                }
+            });
+        });
+
+    </script>
+</head>
+<body>
+<h1><div id="title">通讯录</div>   <div id="add_btn"  align="right" ><button id="add" style="width:90px;height:60px;" align="rigit">添加</button></div></h1>
+
+<div id="contacts"></div>
+<div id="detail" style="display:none">
+    姓名  ： <span id="name"></span><br/>
+    手机号：<span id="number"></span><br/>
+    <div style="text-align:center;margin-top:10px">
+        <button id="back" style="width:90px;height:60px;">返回</button>
+        <button id="delete" style="width:90px;height:60px;">删除</button>
+    </div>
+</div>
+
+
+<div id="add_form" style="display:none" align="center">
+    姓名  ：<input id='name_add' align="center"><br/>
+    手机号：<input id="mobile_add" align="center"><br/>
+    <div style="text-align:center;margin-top:10px">
+        <button id="add_back" style="width:90px;height:60px;">返回</button>
+        <button id="add_confirm" style="width:90px;height:60px;">添加</button>
+    </div>
+</div>
+
+</body>
+</html>
